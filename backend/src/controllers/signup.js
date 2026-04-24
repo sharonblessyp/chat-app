@@ -2,7 +2,7 @@ import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import { sendWelcomeEmail } from "../emails/email_handler.js";
-import "dotenv/config"
+import { ENV } from "../lib/env.js";
 
 export const signup = async (req,res) => {
 const {fullName, email, password} = req.body;
@@ -52,9 +52,9 @@ try{
 
         // send welcome email to user
         try{
-           await sendWelcomeEmail(savedUser.email,savedUser.fullName,process.env.CLIENT_URL) 
+           await sendWelcomeEmail(savedUser.email, savedUser.fullName, ENV.CLIENT_URL);
         }catch (error){
-            console.error("Failed to send welcome email:", error)
+            console.error("Failed to send welcome email:", error);
         }
     }
 } catch(error){

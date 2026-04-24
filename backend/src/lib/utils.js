@@ -1,7 +1,8 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import { ENV } from "./env.js";
 
 export const generateToken = (userId, res) => {
-    const { JWT_SECRET } = process.env;
+    const { JWT_SECRET, NODE_ENV } = ENV;
     if (!JWT_SECRET)
         throw new Error("JWT_SECRET is not configured");
    
@@ -21,8 +22,8 @@ export const generateToken = (userId, res) => {
         // CSRF attacks
         sameSite: "strict",
         // http://localhost
-        secure: process.env.NODE_ENV == "development" ? false : true,
+        secure: NODE_ENV == "development" ? false : true,
     });
 
     return token;
-}
+};
