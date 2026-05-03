@@ -1,9 +1,11 @@
+import { ENV } from "../lib/env.js";
+
 export const logout = (_req, res) => {
     try {
-        res.clearCookie("jwt","", {
+        res.clearCookie("jwt", {
             httpOnly: true,
             sameSite: "strict",
-            maxAge: 0,
+            secure: ENV.NODE_ENV === "development" ? false : true,
         });
 
         return res.status(200).json({ message: "Logged out successfully" });

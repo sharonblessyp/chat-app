@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 /*
-every single messgae has sender ID, coming from user 
+every message has sender ID, coming from user for reference, receiver ID, coming from user for reference,
+text and image (optional) 
+timestamps for sorting
+displaying the time of the message
 */
 const messageSchema = new mongoose.Schema(
   {
