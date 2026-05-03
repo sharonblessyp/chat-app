@@ -4,7 +4,7 @@ import { login } from "../controllers/login.js";
 import { logout } from "../controllers/logout.js";
 import { checkAuth } from "../controllers/check_auth.js";
 import { updateProfile } from "../controllers/update_profile.js";
-import { protectRoute } from "../controllers/middleware/middleware.js";
+import { protectRoute } from "../controllers/middleware/authentication.js";
 
 const router = express.Router();
 

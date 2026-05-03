@@ -158,12 +158,11 @@ function ChatPage() {
                   }
                 />
                 <span className="absolute -bottom-1 -right-1 rounded-full bg-cyan-400 px-2 py-1 text-[10px] font-bold text-slate-950">
-                  Edit
+                  Change
                 </span>
               </button>
 
               <div>
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Signed in</p>
                 <h2 className="mt-1 text-xl font-bold text-white">{authUser.fullName}</h2>
                 <p className="text-sm text-slate-400">{authUser.email}</p>
                 <p className="mt-2 text-xs text-cyan-300">
@@ -334,7 +333,6 @@ function ChatPage() {
                   }
                 />
                 <div>
-                  <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Conversation</p>
                   <h3 className="text-2xl font-bold text-white">{selectedContact.fullName}</h3>
                   <p className="text-sm text-slate-400">{selectedContact.email}</p>
                 </div>
