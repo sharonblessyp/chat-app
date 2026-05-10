@@ -2,8 +2,13 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { apiRequest, ApiError, getErrorMessage } from "../lib/api";
 import type { AuthFormData, User } from "../types/chat";
+import { io, type Socket } from "socket.io-client";
+
+const BASE_URL = import.meta.env.DEV ? "http://localhost:3000" : "/";
 
 type AuthState = {
+  socket: Socket | null;
+  onlineUsers: string[];
   authUser: User | null;
   isCheckingAuth: boolean;
   isSigningUp: boolean;
@@ -14,14 +19,18 @@ type AuthState = {
   login: (payload: AuthFormData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (profilePic: string) => Promise<void>;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set,get) => ({
   authUser: null,
   isCheckingAuth: true,
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
+  socket: null,
+  onlineUsers: [],
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
@@ -29,6 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const authUser = await apiRequest<User>("/auth/check-auth");
       set({ authUser });
+      get().connectSocket();
     } catch (error) {
       if (!(error instanceof ApiError) || error.status !== 401) {
         toast.error(getErrorMessage(error));
@@ -50,6 +60,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({ authUser });
       toast.success("Account created successfully");
+    
+      get().connectSocket();
     } catch (error) {
       toast.error(getErrorMessage(error));
       throw error;
@@ -66,9 +78,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         method: "POST",
         body: payload,
       });
-
+      
       set({ authUser });
       toast.success(`Welcome back, ${authUser.fullName}`);
+
+      get().connectSocket();
     } catch (error) {
       toast.error(getErrorMessage(error));
       throw error;
@@ -82,6 +96,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       await apiRequest<{ message: string }>("/auth/logout", { method: "POST" });
       set({ authUser: null });
       toast.success("Signed out");
+      
+      get().disconnectSocket();
     } catch (error) {
       toast.error(getErrorMessage(error));
       throw error;
@@ -104,6 +120,45 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw error;
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  connectSocket: () => {
+    const {authUser} = get()
+    if(!authUser || get().socket?.connected) return;
+  
+  console.log("Connecting to socket...")
+  const socket = io(BASE_URL, {
+    // this ensures cookies are sent with the connection 
+    withCredentials: true,
+  })
+
+  socket.on("connect", () => {
+    console.log("socket connected", socket.id);
+  });
+
+  socket.on("connect_error", (error) => {
+    console.log("socket connect_error", error.message);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log("socket disconnected", reason);
+  });
+
+  socket.connect();
+
+  set({socket});
+
+  // listen for online user events
+  socket.on("getOnlineUsers", (users: string[]) => {
+    set({onlineUsers: users})
+  });
+},
+
+disconnectSocket: () => {
+    const socket = get().socket;
+    if (socket?.connected) {
+      socket.disconnect();
     }
   },
 }));

@@ -4,6 +4,11 @@ import { ENV } from "../../lib/env.js"
 
 export const socketAuthMiddleware = async (socket, next) => {
     try {
+        console.log("socketAuthMiddleware hit", {
+            socketId: socket.id,
+            hasCookieHeader: Boolean(socket.handshake.headers.cookie),
+        });
+
         // extract token from http-only cookies
         const token = socket.handshake.headers.cookie
             ?.split(";")
@@ -31,6 +36,10 @@ export const socketAuthMiddleware = async (socket, next) => {
         // attach user info to socket
         socket.user = user;
         socket.userId = user._id.toString();
+        console.log("socket auth success", {
+            socketId: socket.id,
+            userId: socket.userId,
+        });
         next();  
     }catch (error) {
         console.error("Error in socket auth middleware", error.message);

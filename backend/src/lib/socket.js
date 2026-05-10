@@ -1,4 +1,4 @@
-import { Server } from "Socket.io"
+import { Server } from "socket.io"
 import http from "http"
 import express from "express"
 import { ENV } from "./env.js"
@@ -22,6 +22,10 @@ io.use(socketAuthMiddleware);
 const userSocketMap = {}; // {userId: socketId}
 
 io.on("connection", (socket) => {
+    console.log("socket connection event fired", {
+        socketId: socket.id,
+        userId: socket.userId,
+    });
     console.log(`New socket connection: ${socket.id} for user ${socket.userId}`);
     userSocketMap[socket.userId] = socket.id;   
     
