@@ -25,6 +25,7 @@ io.on("connection", (socket) => {
     console.log("socket connection event fired", {
         socketId: socket.id,
         userId: socket.userId,
+        userName: socket.user.fullName,
     });
     console.log(`New socket connection: ${socket.id} for user ${socket.userId}`);
     userSocketMap[socket.userId] = socket.id;   

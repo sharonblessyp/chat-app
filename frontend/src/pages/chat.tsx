@@ -25,7 +25,8 @@ function ChatPage() {
   const authUser = useAuthStore((state) => state.authUser);
   const logout = useAuthStore((state) => state.logout);
   const updateProfile = useAuthStore((state) => state.updateProfile);
-  const isUpdatingProfile = useAuthStore((state) => state.isUpdatingProfile);
+  //const isUpdatingProfile = useAuthStore((state) => state.isUpdatingProfile);
+  const isOnline = useAuthStore((state) => state.onlineUsers);
 
   const contacts = useChatStore((state) => state.contacts);
   const chats = useChatStore((state) => state.chats);
@@ -149,24 +150,28 @@ function ChatPage() {
                 onClick={() => profileInputRef.current?.click()}
                 type="button"
               >
-                <img
-                  alt={authUser.fullName}
-                  className="size-16 rounded-2xl border border-white/10 object-cover"
-                  src={
-                    authUser.profilePic ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.fullName)}&background=0f172a&color=ffffff`
-                  }
-                />
+                <div className="relative">
+                  <img
+                    alt={authUser.fullName}
+                    className="size-16 rounded-full border border-white/10 object-cover"
+                    src={
+                      authUser.profilePic ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.fullName)}&background=0f172a&color=ffffff`
+                    }
+                  />
+                  {isOnline.includes(authUser._id) && (
+                    <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-slate-950 bg-green-400" />
+                  )}
+                </div>
                 <span className="absolute -bottom-1 -right-1 rounded-full bg-cyan-400 px-2 py-1 text-[10px] font-bold text-slate-950">
                   Change
                 </span>
               </button>
-
               <div>
-                <h2 className="mt-1 text-xl font-bold text-white">{authUser.fullName}</h2>
+                  <h2 className="mt-1 text-xl font-bold text-white">{authUser.fullName}</h2>
                 <p className="text-sm text-slate-400">{authUser.email}</p>
                 <p className="mt-2 text-xs text-cyan-300">
-                  {isUpdatingProfile ? "Updating photo..." : "Tap avatar to change profile photo"}
+                  {isOnline ? "Online" : "Offline"}
                 </p>
               </div>
             </div>
@@ -242,14 +247,19 @@ function ChatPage() {
                   onClick={() => setSelectedContact(chat.contact)}
                   type="button"
                 >
-                  <img
-                    alt={chat.contact.fullName}
-                    className="size-12 rounded-2xl object-cover"
-                    src={
-                      chat.contact.profilePic ||
+                  <div className="relative">
+                    <img
+                      alt={chat.contact.fullName}
+                      className="size-12 rounded-full object-cover"
+                      src={
+                        chat.contact.profilePic ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(chat.contact.fullName)}&background=111827&color=ffffff`
                     }
                   />
+                  {isOnline.includes(chat.contact._id) && (
+                    <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-slate-950 bg-green-400" />
+                  )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
                       <p className="truncate font-semibold text-white">{chat.contact.fullName}</p>
@@ -289,6 +299,7 @@ function ChatPage() {
                   onClick={() => setSelectedContact(contact)}
                   type="button"
                 >
+                  <div className="relative">
                   <img
                     alt={contact.fullName}
                     className="size-12 rounded-2xl object-cover"
@@ -297,6 +308,10 @@ function ChatPage() {
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.fullName)}&background=111827&color=ffffff`
                     }
                   />
+                  {isOnline.includes(contact._id) && (
+                    <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-slate-950 bg-green-400" />
+                  )}
+                  </div>
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-white">{contact.fullName}</p>
                     <p className="truncate text-sm text-slate-400">{contact.email}</p>
@@ -335,6 +350,11 @@ function ChatPage() {
                 <div>
                   <h3 className="text-2xl font-bold text-white">{selectedContact.fullName}</h3>
                   <p className="text-sm text-slate-400">{selectedContact.email}</p>
+                  {isOnline.includes(selectedContact._id) ? (
+                    <p className="text-sm text-green-400">Online</p>
+                  ) : (
+                    <p className="text-sm text-slate-400">Offline</p>
+                  )}
                 </div>
               </div>
 
