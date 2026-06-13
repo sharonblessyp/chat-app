@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io, userSocketMap } from "../lib/socket.js";
 
 export const getContacts = async (req, res) => {
     try {
@@ -132,6 +133,10 @@ export const sendMessage = async (req, res) => {
         });
 
         // send message in real time if user is online using socket.io
+        const receiverSocketId = userSocketMap[receiverId];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("receiveMessage", message);
+        }
 
         return res.status(201).json(message);
     } catch (error) {

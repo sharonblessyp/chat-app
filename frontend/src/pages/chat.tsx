@@ -48,6 +48,7 @@ function ChatPage() {
   const [activeList, setActiveList] = useState<"recent" | "contacts">("recent");
   const profileInputRef = useRef<HTMLInputElement | null>(null);
   const messageInputRef = useRef<HTMLInputElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void Promise.all([getContacts(), getChats()]);
@@ -70,6 +71,14 @@ function ChatPage() {
 
     void getMessages(selectedContact._id);
   }, [selectedContact, getMessages]);
+
+  useEffect(() => {
+    if (!selectedContact || isMessagesLoading) {
+      return;
+    }
+
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages.length, selectedContact, isMessagesLoading]);
 
   const handleProfileFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -103,8 +112,10 @@ function ChatPage() {
     event.target.value = "";
   };
 
-  const handleSendMessage = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSendMessage = async (
+    event?: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    event?.preventDefault();
     if (!selectedContact) {
       return;
     }
@@ -171,7 +182,7 @@ function ChatPage() {
                   <h2 className="mt-1 text-xl font-bold text-white">{authUser.fullName}</h2>
                 <p className="text-sm text-slate-400">{authUser.email}</p>
                 <p className="mt-2 text-xs text-cyan-300">
-                  {isOnline ? "Online" : "Offline"}
+                  {isOnline ? "online" : "offline"}
                 </p>
               </div>
             </div>
@@ -351,22 +362,12 @@ function ChatPage() {
                   <h3 className="text-2xl font-bold text-white">{selectedContact.fullName}</h3>
                   <p className="text-sm text-slate-400">{selectedContact.email}</p>
                   {isOnline.includes(selectedContact._id) ? (
-                    <p className="text-sm text-green-400">Online</p>
+                    <p className="text-sm text-green-400">online</p>
                   ) : (
-                    <p className="text-sm text-slate-400">Offline</p>
+                    <p className="text-sm text-slate-400">offline</p>
                   )}
                 </div>
               </div>
-
-              <button
-                className="rounded-2xl border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
-                onClick={() => {
-                  void Promise.all([getChats(), getMessages(selectedContact._id)]);
-                }}
-                type="button"
-              >
-                Refresh
-              </button>
             </header>
 
             <div className="flex-1 space-y-4 overflow-y-auto px-8 py-6">
@@ -427,6 +428,7 @@ function ChatPage() {
                   </div>
                 );
               })}
+              <div ref={messagesEndRef} />
             </div>
 
             <form className="border-t border-white/10 px-8 py-5" onSubmit={handleSendMessage}>
@@ -462,6 +464,11 @@ function ChatPage() {
                 <textarea
                   className="min-h-[64px] flex-1 rounded-[1.5rem] border border-white/10 bg-slate-900/70 px-5 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-400/20"
                   onChange={(event) => setMessageText(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      void handleSendMessage(event);
+                    }
+                  }}
                   placeholder={`Message ${selectedContact.fullName}...`}
                   value={messageText}
                 />

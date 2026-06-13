@@ -22,6 +22,7 @@ type ChatState = {
   getMessages: (userId: string) => Promise<void>;
   setSelectedContact: (contact: User | null) => void;
   sendMessage: (receiverId: string, payload: SendMessagePayload) => Promise<void>;
+  receiveMessage: (message: Message) => void;
   resetChat: () => void;
 };
 
@@ -86,6 +87,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setSelectedContact: (selectedContact) => {
     set({ selectedContact, messages: [] });
+  },
+
+  receiveMessage: (message) => {
+    set((state) => {
+      const contact =
+        state.contacts.find((contact) => contact._id === message.senderId) ||
+        state.chats.find((chat) => chat.contact._id === message.senderId)?.contact;
+
+      const updatedChats = contact
+        ? updateChatPreviewList(state.chats, contact, message)
+        : state.chats;
+
+      return {
+        chats: updatedChats,
+        messages:
+          state.selectedContact?._id === message.senderId
+            ? [...state.messages, message]
+            : state.messages,
+      };
+    });
   },
 
   sendMessage: async (receiverId, payload) => {

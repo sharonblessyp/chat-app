@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { apiRequest, ApiError, getErrorMessage } from "../lib/api";
-import type { AuthFormData, User } from "../types/chat";
+import type { AuthFormData, Message, User } from "../types/chat";
 import { io, type Socket } from "socket.io-client";
+import { useChatStore } from "./useChatStore";
 
 const BASE_URL = import.meta.env.DEV ? "http://localhost:3000" : "/";
 
@@ -139,6 +140,10 @@ export const useAuthStore = create<AuthState>((set,get) => ({
 
   socket.on("connect_error", (error) => {
     console.log("socket connect_error", error.message);
+  });
+
+  socket.on("receiveMessage", (message: Message) => {
+    useChatStore.getState().receiveMessage(message);
   });
 
   socket.on("disconnect", (reason) => {

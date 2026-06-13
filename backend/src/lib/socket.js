@@ -19,7 +19,7 @@ const io = new Server(server, {
 //apply authentication middleware to all socket connections
 io.use(socketAuthMiddleware);
 
-const userSocketMap = {}; // {userId: socketId}
+export const userSocketMap = {}; // {userId: socketId}
 
 io.on("connection", (socket) => {
     console.log("socket connection event fired", {
